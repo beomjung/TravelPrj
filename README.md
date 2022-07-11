@@ -4,7 +4,7 @@
 
 ## 소개 영상
 
-<iframe width="1046" height="510" src="https://www.youtube.com/embed/VWqvPEzaoPg" title="자연어처리를 활용한 사용자 여행지 추천 서비스" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![Video Label](http://img.youtube.com/vi/'VWqvPEzaoPg'/0.jpg)](https://youtu.be/'VWqvPEzaoPg')
 
 ## 적용기술
 ```
