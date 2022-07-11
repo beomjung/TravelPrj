@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="kopo.poly.persistance.mapper.IUserMapper">
+    <select id="UserLogin" resultType="UserDTO">
+        SELECT USER_ID, USER_PASSWORD, USER_SEQ, USER_NAME,USER_NICKNAME
+        FROM USER_INFO
+        WHERE USER_ID = #{user_id}
+          AND USER_PASSWORD = #{user_pwd}
+    </select>
+
+    <insert id="InsertUserInfo" parameterType="UserDTO" useGeneratedKeys="true" keyProperty="user_seq">
+        INSERT INTO USER_INFO
+        (USER_ID,
+         USER_PASSWORD,
+         USER_EMAIL,
+         USER_NAME,
+         USER_NICKNAME,
+         USER_AGE,
+         USER_ADDR,
+         USER_GENDER,
+         USER_FILE_SEQ,
+         USER_INTRODUCATION)
+        VALUES (#{user_id},
+                #{user_pwd},
+                #{user_email},
+                #{user_name},
+                #{user_nickname},
+                #{user_age},
+                #{user_addr},
+                #{user_gender},
+                #{user_file_seq},
+                #{user_introducation})
+    </insert>
+
+    <select id="UserIdCheck" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_SEQ, USER_ID, USER_NICKNAME, USER_NAME, USER_EMAIL, USER_AGE, USER_INTRODUCATION
+        FROM USER_INFO
+        WHERE USER_ID = #{user_id}
+    </select>
+
+    <select id="UserEmailCheck" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_EMAIL
+        FROM USER_INFO
+        WHERE USER_EMAIL = #{user_email}
+    </select>
+
+    <select id="findUserId" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_ID
+        FROM USER_INFO
+        WHERE USER_NAME = #{user_name}
+          AND USER_EMAIL = #{user_email}
+    </select>
+
+    <select id="selectUserInterest" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_INTEREST_CONTENT
+        FROM USER_INTEREST
+        WHERE USER_SEQ = #{user_seq};
+    </select>
+
+    <update id="findUserPwd" parameterType="UserDTO">
+        UPDATE USER_INFO
+        SET USER_PASSWORD = #{user_pwd}
+        WHERE USER_ID = #{user_id}
+    </update>
+
+    <delete id="DeleteUserInfo" parameterType="UserDTO">
+        DELETE
+        FROM USER_INFO
+        WHERE USER_ID = #{user_id};
+    </delete>
+
+    <insert id="insertUserInterest" parameterType="UserDTO">
+       INSERT INTO USER_INTEREST
+        (USER_SEQ, USER_INTEREST_CONTENT)
+        VALUES (#{user_seq}, #{user_interest_content})
+    </insert>
+
+    <insert id="insertUserInterestCity" parameterType="UserDTO">
+        INSERT INTO USER_INTEREST
+            (USER_SEQ, USER_INTEREST_CITY)
+        VALUES (#{user_seq}, #{user_interest_city})
+    </insert>
+
+    <update id="updateUserImage" parameterType="UserDTO">
+        UPDATE USER_INFO
+        SET USER_FILE_SEQ = #{file_seq}
+        WHERE USER_ID = #{user_id};
+    </update>
+
+    <select id="userNickImgPath" parameterType="Board_PostDTO" resultType="UserDTO">
+        SELECT U.USER_NICKNAME,U.USER_INTRODUCATION, F.FILE_DETAIL_PATH
+        FROM USER_INFO U, FILE_INFORMATION_DETAIL F, TRAVEL_BOARD B
+        WHERE U.USER_FILE_SEQ = FILE_SEQ AND B.BOARD_USER_SEQ = U.USER_SEQ AND B.BOARD_SEQ=#{board_seq}
+    </select>
+
+    <select id="userMyPagePath" parameterType="UserDTO" resultType="UserDTO">
+        SELECT U.USER_NICKNAME, U.USER_INTRODUCATION, F.FILE_DETAIL_PATH
+        FROM USER_INFO U,
+             FILE_INFORMATION_DETAIL F,
+             TRAVEL_BOARD B
+        WHERE U.USER_FILE_SEQ = F.FILE_SEQ AND
+            U.USER_SEQ=#{user_seq} AND B.BOARD_SEQ=#{board_seq} LIMIT 1
+    </select>
+
+    <insert id="insertFollow" parameterType="UserDTO">
+        INSERT INTO FOLLOWERS(FOLLOWER, FOLLOWEE) VALUES (#{user_seq},#{board_user_seq})
+    </insert>
+    <delete id="deleteFollow" parameterType="UserDTO">
+        DELETE FROM FOLLOWERS
+        WHERE FOLLOWER=#{user_seq} AND FOLLOWEE=#{board_user_seq};
+    </delete>
+    
+    <select id="selectFollower" parameterType="UserDTO" resultType="int">
+        SELECT COUNT(FOLLOWER)
+        FROM FOLLOWERS
+        WHERE FOLLOWEE=#{board_user_seq}
+    </select>
+
+    <select id="selectFollowing" parameterType="UserDTO" resultType="int">
+        SELECT COUNT(FOLLOWEE)
+        FROM FOLLOWERS
+        WHERE FOLLOWER = #{board_user_seq}
+    </select>
+
+    <select id="authFollower" parameterType="UserDTO" resultType="int">
+        SELECT COUNT(FOLLOWER)
+        FROM FOLLOWERS
+        WHERE FOLLOWER=#{user_seq} AND FOLLOWEE=#{board_user_seq}
+    </select>
+    <select id="selectUserFilePath" parameterType="UserDTO" resultType="String">
+        SELECT FILE_DETAIL_PATH
+        FROM USER_INFO U, FILE_INFORMATION_DETAIL F
+        WHERE U.USER_FILE_SEQ = F.FILE_SEQ AND USER_SEQ=#{user_seq}
+    </select>
+
+    <select id="userEmailCheck" parameterType="UserDTO" resultType="UserDTO">
+        SELECT *
+        FROM USER_INFO
+        WHERE USER_EMAIL = #{user_email}
+    </select>
+
+    <select id="boarduserNickImgPath" parameterType="UserDTO" resultType="UserDTO">
+        SELECT U.USER_NICKNAME,U.USER_INTRODUCATION, F.FILE_DETAIL_PATH
+        FROM USER_INFO U, FILE_INFORMATION_DETAIL F
+        WHERE U.USER_FILE_SEQ = FILE_SEQ AND USER_SEQ=#{user_seq}
+    </select>
+
+    <delete id="deleteBookMarkUser" parameterType="UserDTO">
+        DELETE
+        FROM BOOKMARK
+        WHERE USER_SEQ =#{user_seq}
+    </delete>
+
+    <delete id="deleteFileDetailUser" parameterType="UserDTO">
+        DELETE FROM FILE_INFORMATION_DETAIL
+        WHERE FILE_DETAIL_CHG_ID = #{user_id}
+    </delete>
+
+    <delete id="deleteFileInfoUser" parameterType="UserDTO">
+        DELETE FROM FILE_INFORMATION
+        WHERE FILE_USER_SEQ = #{user_seq}
+    </delete>
+
+</mapper>

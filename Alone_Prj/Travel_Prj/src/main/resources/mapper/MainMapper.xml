@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kopo.poly.persistance.mapper.IMainMapper">
+    <update id="updateUserInfo" parameterType="UserDTO">
+        UPDATE USER_INFO
+        SET USER_NICKNAME=#{user_nickname},
+            USER_AGE=#{user_age},
+            USER_INTRODUCATION=#{user_introducation},
+            USER_FILE_SEQ = #{file_seq}
+        WHERE USER_ID = #{user_id}
+    </update>
+
+    <update id="updateUser" parameterType="UserDTO">
+        UPDATE USER_INFO
+        SET USER_NICKNAME=#{user_nickname},
+            USER_AGE=#{user_age},
+            USER_INTRODUCATION=#{user_introducation}
+        WHERE USER_ID = #{user_id}
+    </update>
+    <select id="selectUserImg" parameterType="UserDTO" resultType="String">
+        SELECT F.FILE_DETAIL_PATH
+        FROM USER_INFO U,
+             FILE_INFORMATION_DETAIL F
+        WHERE U.USER_FILE_SEQ = F.FILE_SEQ
+          AND U.USER_SEQ = #{user_seq}
+    </select>
+
+    <select id="selectMyPage" parameterType="UserDTO" resultType="UserDTO">
+        SELECT U.USER_ID, U.USER_NICKNAME, U.USER_INTRODUCATION, F.FILE_DETAIL_PATH
+        FROM USER_INFO U,
+             FILE_INFORMATION_DETAIL F
+        WHERE U.USER_FILE_SEQ = F.FILE_SEQ
+          AND U.USER_SEQ = #{user_seq}
+    </select>
+    <insert id="fileInfoDB" parameterType="FileInfoDTO" useGeneratedKeys="true" keyProperty="file_seq">
+        INSERT INTO FILE_INFORMATION
+            (FILE_USER_SEQ, FILE_CODE)
+        VALUES (#{user_seq}, #{file_code});
+    </insert>
+    <insert id="fileDetailDB" parameterType="FileDetailDTO">
+        INSERT INTO FILE_INFORMATION_DETAIL
+        (FILE_SEQ,
+         FILE_DETAIL_SEQ,
+         FILE_DETAIL_NAME,
+         FILE_DETAIL_PATH,
+         FILE_DETAIL_ORG_NAME,
+         FILE_DETAIL_EXT,
+         FILE_DETAIL_REG_ID,
+         FILE_DETAIL_CHG_ID)
+        VALUES (#{file_seq},
+                (SELECT IFNULL(MAX(FILE_DETAIL_SEQ), 0) + 1
+                 FROM FILE_INFORMATION_DETAIL ALIAS_FOR_SUBQUERY
+                 WHERE FILE_SEQ = #{file_seq}),
+                #{file_detail_name},
+                #{file_detail_path},
+                #{file_detail_orgName},
+                #{file_detail_ext},
+                #{file_reg_id},
+                #{file_chg_id});
+    </insert>
+
+    <insert id="insertBookMark" parameterType="BookMarkDTO" useGeneratedKeys="true" keyProperty="bookmark_seq">
+        INSERT INTO BOOKMARK
+            (USER_SEQ, BOARD_SEQ, BOARD_USER_SEQ)
+        VALUES (#{user_seq}, #{board_seq}, #{board_user_seq});
+    </insert>
+
+    <select id="selectBookMark" resultType="BookMarkDTO">
+        SELECT B.BOARD_USER_SEQ, B.BOARD_SEQ, F.FILE_DETAIL_PATH
+        FROM BOOKMARK B,
+             FILE_INFORMATION_DETAIL F,
+             BOARD_POST P
+        WHERE B.BOARD_SEQ = P.BOARD_SEQ
+          AND B.USER_SEQ = #{user_seq}
+          AND P.FILE_SEQ = F.FILE_SEQ
+        GROUP BY P.BOARD_SEQ
+    </select>
+
+    <select id="selectMyPagePost" parameterType="UserDTO" resultType="UserDTO">
+        SELECT B.BOARD_SEQ, B.USER_SEQ,B.BOARD_POST_CONTENT, B.BOARD_POST_TITLE, F.FILE_DETAIL_PATH
+        FROM BOARD_POST B,
+             FILE_INFORMATION_DETAIL F
+        WHERE B.FILE_SEQ = F.FILE_SEQ
+          AND B.BOARD_POST_SEQ = 1
+          AND B.USER_SEQ = #{user_seq}
+    </select>
+
+    <select id="selectFollowee" parameterType="FollowDTO" resultType="FollowDTO">
+        SELECT FOLLOWEE
+        FROM FOLLOWERS
+        WHERE FOLLOWER = #{user_seq};
+    </select>
+
+    <select id="selectFollower" parameterType="FollowDTO" resultType="FollowDTO">
+        SELECT FOLLOWER
+        FROM FOLLOWERS
+        WHERE FOLLOWEE = #{user_seq};
+    </select>
+
+
+    <select id="selectFollowPost" parameterType="Board_PostDTO" resultType="Board_PostDTO">
+        SELECT DISTINCTROW(B.BOARD_SEQ),
+               B.USER_SEQ,
+               B.BOARD_POST_TITLE,
+               B.BOARD_POST_CONTENT,
+               F.FILE_DETAIL_PATH,
+               (SELECT FILE_DETAIL_PATH
+                FROM USER_INFO U,
+                     FILE_INFORMATION_DETAIL F
+                WHERE U.USER_FILE_SEQ = F.FILE_SEQ
+                  AND USER_SEQ = #{user_seq})                                     AS USER_FILE_PATH,
+               (SELECT USER_NICKNAME FROM USER_INFO WHERE USER_SEQ = #{user_seq}) AS USER_NICKNAME
+        FROM BOARD_POST B,
+             FILE_INFORMATION_DETAIL F,
+             USER_INFO U
+        WHERE B.FILE_SEQ = F.FILE_SEQ
+          AND B.USER_SEQ = #{user_seq}
+          AND BOARD_POST_SEQ = 1
+    </select>
+
+    <select id="selectFollowUserInfo" parameterType="FollowDTO" resultType="FollowDTO">
+        SELECT U.USER_NICKNAME,
+               IFNULL(U.USER_INTRODUCATION, '소개글을 작성해 주세요'),
+               (SELECT IFNULL(F.FILE_DETAIL_PATH, 0)
+                FROM USER_INFO U,
+                     FILE_INFORMATION_DETAIL F
+                WHERE U.USER_FILE_SEQ = F.FILE_SEQ AND U.USER_SEQ = #{user_seq}) AS USER_FILE_PATH
+        FROM USER_INFO U,
+             FILE_INFORMATION_DETAIL F
+        WHERE U.USER_SEQ = #{user_seq} LIMIT 1;
+    </select>
+
+    <select id="selectUserInterest" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_INTEREST_CONTENT
+        FROM USER_INTEREST
+        WHERE USER_SEQ = #{user_seq}
+    </select>
+
+    <select id="recommendTravel" parameterType="NlpDTO" resultType="NlpDTO">
+        SELECT DISTINCTROW (NLP_ADDR) AS NLP_ADDR
+        FROM NLP_TRAVEL
+        WHERE AREACODE=#{areacode} AND DETAIL_AREACODE=#{detail_areacode};
+    </select>
+
+    <select id="recommendStar" parameterType="NlpDTO" resultType="NlpDTO">
+        SELECT NLP_ADDR,AREACODE, DETAIL_AREACODE,
+               concat(round((COUNT(CASE WHEN NLP_RESULT = '1' THEN 1 END)/(COUNT(NLP_RESULT)) * 100 ))) AS NLP_RES
+        FROM NLP_TRAVEL
+        WHERE NLP_ADDR=#{nlp_addr}
+    </select>
+
+    <select id="selectUserAddr" parameterType="UserDTO" resultType="UserDTO">
+        SELECT USER_ADDR
+        FROM USER_INFO
+        WHERE USER_SEQ = #{user_seq}
+    </select>
+
+    <select id="selectUserRoom" parameterType="UserDTO" resultType="UserDTO">
+        SELECT IFNULL(ROOMKEY, 'null') AS ROOMKEY
+        FROM USER_INFO
+        WHERE USER_SEQ=#{user_seq}
+    </select>
+
+    <update id="updateUserRoom" parameterType="UserDTO">
+        UPDATE USER_INFO
+        SET ROOMKEY = #{roomkey}
+        WHERE USER_SEQ = #{user_seq}
+    </update>
+
+    <select id="selectUserRoomList" resultType="UserDTO">
+        SELECT USER_NAME, ROOMKEY
+        FROM USER_INFO
+        WHERE ROOMKEY IS NOT NULL
+    </select>
+</mapper>
+

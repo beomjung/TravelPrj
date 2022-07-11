@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kopo.poly.persistance.mapper.IBoardMapper">
+
+
+    <insert id="insertBoardInfo" parameterType="Travel_BoardDTO" useGeneratedKeys="true" keyProperty="board_seq">
+        INSERT INTO TRAVEL_BOARD
+        (BOARD_USER_SEQ, BOARD_START_DAY, BOARD_END_DAY,
+         BOARD_REG_ID, BOARD_CHG_ID)
+        VALUES (#{user_seq}, #{start_day}, #{end_day}, #{user_id}, #{user_id})
+    </insert>
+    <insert id="insertBoardDetail" parameterType="Board_PostDTO">
+        INSERT INTO BOARD_POST
+        (BOARD_SEQ,
+         BOARD_POST_SEQ,
+         FILE_SEQ,
+         USER_SEQ,
+         BOARD_POST_TITLE,
+         BOARD_POST_CONTENT,
+         BOARD_POST_POSTION,
+         BOARD_POST_STAR,
+         BOARD_POST_HASHTAG,
+         AREACODE,
+         DETAIL_AREACODE)
+        VALUES (#{board_seq}, (SELECT IFNULL(MAX(BOARD_POST_SEQ), 0) + 1
+                               FROM BOARD_POST ALIAS_FOR_BOARDDETAIL
+                               WHERE BOARD_SEQ = #{board_seq}), #{file_seq}, #{user_seq},
+                #{board_post_title}, #{board_post_content}, #{board_post_postion}, #{board_post_star},
+                #{board_post_hashTag}, #{areacode}, #{detail_areacode})
+    </insert>
+    <select id="selectBoardContent" parameterType="Board_PostDTO" resultType="Board_PostDTO">
+        SELECT B.BOARD_SEQ,
+               B.BOARD_START_DAY,
+               B.BOARD_END_DAY,
+               B.BOARD_VIEWS,
+               B.BOARD_LIKE,
+               P.BOARD_POST_SEQ,
+               P.BOARD_POST_TITLE,
+               P.BOARD_POST_CONTENT,
+               P.USER_SEQ,
+               P.BOARD_POST_STAR,
+               P.BOARD_POST_POSTION,
+               P.BOARD_POST_HASHTAG,
+               P.AREACODE,
+               P.DETAIL_AREACODE,
+               F.FILE_DETAIL_PATH,
+               F.FILE_SEQ
+        FROM TRAVEL_BOARD B,
+             BOARD_POST P,
+             FILE_INFORMATION_DETAIL F
+        WHERE B.BOARD_SEQ = #{board_seq}
+          AND B.BOARD_SEQ = P.BOARD_SEQ
+          AND P.FILE_SEQ = F.FILE_SEQ
+    </select>
+
+    <select id="selectBoardList" resultType="Board_PostDTO">
+        SELECT B.BOARD_SEQ, B.USER_SEQ, B.BOARD_POST_TITLE, B.BOARD_POST_CONTENT, F.FILE_DETAIL_PATH
+        FROM BOARD_POST B,
+             FILE_INFORMATION_DETAIL F
+        WHERE B.FILE_SEQ = F.FILE_SEQ
+          AND B.BOARD_POST_SEQ = 1;
+    </select>
+
+    <select id="selectBoardCnt" parameterType="UserDTO" resultType="int">
+        SELECT COUNT(BOARD_SEQ)
+        FROM TRAVEL_BOARD
+        WHERE BOARD_USER_SEQ = #{board_user_seq}
+    </select>
+
+    <delete id="deleteBoardPost" parameterType="Board_PostDTO">
+        DELETE
+        FROM BOARD_POST
+        WHERE BOARD_SEQ = #{board_seq}
+    </delete>
+
+    <delete id="deleteBoard" parameterType="Board_PostDTO">
+        DELETE
+        FROM TRAVEL_BOARD
+        WHERE BOARD_SEQ = #{board_seq}
+    </delete>
+
+    <delete id="deleteFileInfo" parameterType="Board_PostDTO">
+        DELETE
+        FROM FILE_INFORMATION
+        WHERE FILE_SEQ = #{file_seq}
+    </delete>
+
+    <delete id="deleteFileDetailInfo" parameterType="Board_PostDTO">
+        DELETE
+        FROM FILE_INFORMATION_DETAIL
+        WHERE FILE_SEQ = #{file_seq}
+    </delete>
+
+    <delete id="deletebookMark" parameterType="Board_PostDTO">
+        DELETE
+        FROM BOOKMARK
+        WHERE BOOKMARK_SEQ = #{bookmark_seq}
+    </delete>
+
+    <update id="updateTravelBoard" parameterType="Travel_BoardDTO">
+        UPDATE TRAVEL_BOARD
+        SET BOARD_END_DAY=#{end_day},
+            BOARD_REG_ID=#{user_id},
+            BOARD_CHG_ID=#{user_id},
+            BOARD_START_DAY=#{start_day}
+        WHERE BOARD_SEQ = #{board_seq}
+          AND BOARD_USER_SEQ = #{user_seq}
+    </update>
+
+    <update id="updateBoardPost" parameterType="Board_PostDTO">
+        UPDATE BOARD_POST
+        SET BOARD_POST_TITLE  = #{board_post_title},
+            BOARD_POST_CONTENT= #{board_post_content},
+            BOARD_POST_STAR   = #{board_post_star},
+            BOARD_POST_POSTION=#{board_post_postion},
+            BOARD_POST_HASHTAG=#{board_post_hashTag}
+        WHERE BOARD_SEQ = #{board_seq}
+          AND BOARD_POST_SEQ = #{board_post_seq}
+    </update>
+
+    <update id="updateBoardFile" parameterType="Board_PostDTO">
+        UPDATE BOARD_POST
+        SET FILE_SEQ = #{file_seq}
+        WHERE BOARD_SEQ = #{board_seq}
+          AND BOARD_POST_SEQ = #{board_post_seq};
+    </update>
+
+    <select id="selectBookMarkSeq" parameterType="BookMarkDTO" resultType="BookMarkDTO">
+        SELECT IFNULL(MAX(BOOKMARK_SEQ),0) AS BOOKMARK_SEQ
+        FROM BOOKMARK
+        WHERE USER_SEQ =#{user_seq} AND BOARD_SEQ=#{board_seq}
+    </select>
+
+    <delete id="deleteBookMarkBoard" parameterType="Board_PostDTO">
+        DELETE
+        FROM BOOKMARK
+        WHERE BOARD_SEQ =#{board_seq}
+    </delete>
+
+</mapper>

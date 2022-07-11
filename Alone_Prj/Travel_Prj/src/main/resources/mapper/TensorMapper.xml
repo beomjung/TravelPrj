@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kopo.poly.persistance.mapper.ITensorMapper">
+
+
+    <select id="selectNlpResult" resultType="Board_PostDTO">
+        SELECT U.USER_AGE, U.USER_GENDER, BOARD_POST_CONTENT, B.BOARD_POST_POSTION, B.AREACODE, B.DETAIL_AREACODE
+        FROM USER_INFO U, BOARD_POST B
+        WHERE U.USER_SEQ = B.USER_SEQ
+    </select>
+
+    <insert id="insertNlpResult" parameterType="NlpDTO">
+        INSERT INTO NLP_TRAVEL
+            (NLP_ADDR, NLP_CONTENT, NLP_AGE, NLP_GENDER, NLP_RESULT, AREACODE, DETAIL_AREACODE)
+        VALUES (#{nlp_addr},#{nlp_content},#{nlp_age},#{nlp_gender},#{nlp_result},#{areacode}, #{detail_areacode})
+    </insert>
+
+
+</mapper>
