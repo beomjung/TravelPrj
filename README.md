@@ -4,7 +4,7 @@
 
 ## 소개 영상
 
-[![Video Label](http://img.youtube.com/vi/'VWqvPEzaoPg'/0.jpg)](https://youtu.be/'VWqvPEzaoPg')
+[![Video Label](http://img.youtube.com/vi/VWqvPEzaoPg/0.jpg)](https://youtu.be/VWqvPEzaoPg)
 
 ## 적용기술
 ```
