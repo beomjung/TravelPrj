@@ -1,6 +1,6 @@
 ## 자연어 처리를 활용한 사용자 여행지 추천 서비스
 * Alone_Prj/Travel_Prj -> src -> main -> poly (Java Back-End)
-* Alone_Prj/Travel_Prj -> src -> main -> webbapp -> WEB-INF  -> views (JSP 화면)
+* Alone_Prj/Travel_Prj -> src -> main -> webbapp -> WEB-INF  -> views (JSP 화면, 무료 부트 테마를 사용)
 
 ## 소개 영상
 
